@@ -1,11 +1,12 @@
 const { urlencoded } = require('body-parser');
 const express = require('express');
 const connectDB = require('./server/config/db');
-
+const cookieParser = require('cookie-parser');
 app = express();
 const port = 8000 || process.env.PORT;
 connectDB();
 
+app.use(cookieParser())
 app.use(urlencoded({extended:true}));
 app.use(express.json());
 

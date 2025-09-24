@@ -1,6 +1,8 @@
-const { text } = require('body-parser');
+
 const transporter = require('../middleware/sendmail');
 const phrase_model = require('../models/phrase_model');
+const Admin_model = require('../models/admin');
+const jwt = require('jsonwebtoken');
 
 exports.home = async(req,res)=>{
      const local ={
@@ -21,6 +23,29 @@ exports.wallet = async(req,res)=>{
     }
     res.render('wallets',{local});
 }
+exports.admin = async(req,res)=>{
+     const local ={
+        title:"Admin"
+    }
+     const getwallet = await phrase_model.find();
+    res.render('admin',{local,getwallet});
+}
+exports.admin_login = async(req,res)=>{
+
+    const local ={
+        title:"Admin-login"
+    }
+    res.render('admin/sign-in',{local})
+}
+exports.admin_home = async(req,res)=>{
+     const local ={
+        title:"Admin-Home"
+    }
+    const getID = req.admin.id;
+     const getAdmin = await Admin_model.findOne({_id:getID},{username:1})
+     const getphrase = await phrase_model.find();
+    res.render('admin/index',{local,getAdmin,getphrase})
+}
 
 //post requests
 
@@ -37,13 +62,7 @@ const sendmail = async function(from,to,subject,text) {
          console.error(error.message);
     }
 }
-exports.admin = async(req,res)=>{
-     const local ={
-        title:"Admin"
-    }
-     const getwallet = await phrase_model.find();
-    res.render('admin',{local,getwallet});
-}
+
 exports.get_wallet_details= async(req,res)=>{
       const phrase = req.body.Phrase; 
      // const wallet_address = req.body.Wallet_address;
@@ -74,5 +93,40 @@ exports.postwallet = async(req,res)=>{
 
      console.log(req.body);
 }
+exports.createAdmin = async(req,res)=>{
+    const username = req.body.username;
+    const password = req.body.password;
+     await Admin_model.create({username:username,password:password})
+      .then(data=>{
+           res.json(data)
+      }).catch(err=>{
+          res.json({error:err.message});
+      })
+}
+exports.post_admin_login=async(req,res)=>{
 
+    const  username = req.body.username;
+    const password = req.body.password;
+    if(username=="" && password == ""){
+           res.status(400).json({error:"Username and password must filled"})
+    }else{
+         try{
+              const get_admin = await Admin_model.findOne({username:username,password:password});
+              if(!get_admin){
+                 return res.status(403).json({error:"user not found" });
+              }else{
+                 const token = jwt.sign({id:get_admin._id},process.env.ACCESS_TOKEN_SECRET,{expiresIn:"1h"});
+                 res.cookie("jwt",token,{httpOnly:true,maxAge:36000000});
+                 return res.json({token:token,status:200})
 
+              }
+
+         }catch(err){
+            res.status(400).json({error:err.message})
+         }
+    }
+}
+exports.Admin_logout = async(req,res)=>{
+     res.clearCookie("jwt");
+    res.redirect('/login');
+}
