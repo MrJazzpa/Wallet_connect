@@ -235,96 +235,36 @@
 			});
 		});
 	</script>
-	<script>
-		function uploadForm(){
-			return{
-				heading:'',
-				file:null,
-				msg:'',
-				handleFile(event){
-					this.file = event.target.files[0];
-				},
-				async submitForm(){
-					const formData = new FormData();
-					formData.append('heading',this.heading);
-					formData.append('image',this.file);
-
-					try{
-						 const res = await fetch('/api/events_upload',{
-							method:'POST',
-							body:formData
-						 });
-						 const data = await res.json();
-						 this.msg = data.message ||'Uplaod Successful'
-					}catch(err){
-                          console.error(err)
-					}
-				}
-			}
-		}
-
-		
-	</script>
+	
     <script>
-		function teams_form(){
-			return{
-				team_heading:'',
-				file:null,
-				team_msg:'',
-				handleteamFile(event){
-					this.file = event.target.files[0];
-				},
-				async submitTeamsForm(){
-					const formData = new FormData();
-					formData.append('heading',this.team_heading);
-					formData.append('team_image',this.file);
-
-					try{
-						 const res = await fetch('/api/teamUpload',{
-							method:'POST',
-							body:formData
-						 });
-						 const data = await res.json();
-						 this.team_msg = data.message ||'Uplaod Successful'
-					}catch(err){
-                          console.error(err)
-					}
-				}
-			}
-		}
-	</script>
-	 <script>
-		function upcoming_form(){
-			return{
-				upcoming_heading:'',
-				uptime:'',
-				update:'',
-				file:null,
-				team_msg:'',
-				handleupcomingFile(event){
-					this.file = event.target.files[0];
-				},
-				async submitUpcomingForm(){
-					const formData = new FormData();
-					formData.append('upcoming_heading',this.upcoming_heading);
-					formData.append('uptime',this.uptime);
-					formData.append('update',this.update);
-					formData.append('upcoming_image',this.file);
-
-					try{
-						 const res = await fetch('/api/upcomingEvents',{
-							method:'POST',
-							body:formData
-						 });
-						 const data = await res.json();
-						 this.upcoming_msg = data.message ||'Uplaod Successful'
-					}catch(err){
-                          console.error(err)
-					}
-				}
-			}
-		}
-	</script>
+		 $('#changepassword').on('submit',function(e){
+			 e.preventDefault();
+			  let msg="";
+			  let old_password = $('#old_password').val();
+			  let new_password = $('#new_password').val();
+			  let confirm_password = $('#confirm_password').val();
+			  if(new_password != confirm_password){
+				  $('#msg').html(`<p class='alert alert-warning' style="color:maroon">Make sure your password are same</p>`)
+			  }else{
+				   $.ajax({
+							url:'/updatePassword',
+							type:'POST',
+							contentType:'application/json',
+							data:JSON.stringify({old_password,new_password}),
+							success:function(response){
+								 if(response.status==300){
+									$('#msg').html(`<p style="color:maroon" class='alert alert-success'>${response.err_msg}</p>`);
+								 }else{
+									$('#msg').html(`<p class='alert alert-success' style='color:forestgreen'>${response.status}</p>`);
+									$('#old_password').val('');
+			                        $('#new_password').val('');
+			                    $('#confirm_password').val('');
+								 }
+							}
+				   })
+			  }
+		 })
+	</script>	
 </body>
 
 </html>

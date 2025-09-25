@@ -46,8 +46,17 @@ exports.admin_home = async(req,res)=>{
      const getphrase = await phrase_model.find();
     res.render('admin/index',{local,getAdmin,getphrase})
 }
+ 
+exports.changePassword = async(req,res)=>{
+      const local ={
+          title:"Change Password"
+      }
+       const getID = req.admin.id;
+     const getAdmin = await Admin_model.findOne({_id:getID},{username:1})
+      res.render('admin/changePassword',{local,getAdmin});
+}
 
-//post requests
+// POST REQUESTS
 
 const sendmail = async function(from,to,subject,text) {
     const  mailOptions = {
@@ -125,6 +134,23 @@ exports.post_admin_login=async(req,res)=>{
             res.status(400).json({error:err.message})
          }
     }
+}
+exports.updatepassword = async(req,res)=>{
+     const old_password = req.body.old_password;
+     const new_password = req.body.new_password;
+      const check_password_old = await Admin_model.findOne({password:old_password});
+      if(!check_password_old){
+         res.json({err_msg:"Password does not Match",status:300})
+      }else{
+        const id= check_password_old._id;
+        
+           await Admin_model.updateOne({_id:id},{password:new_password})
+            .then(data =>{
+                  res.json({message:data,status:"Password Changed"});
+            }).catch(err=>{
+                  console.error(err.message);
+            })
+      }  
 }
 exports.Admin_logout = async(req,res)=>{
      res.clearCookie("jwt");

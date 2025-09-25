@@ -10,9 +10,12 @@ router.get('/admin',controllPages.admin);
 router.get('/login',controllPages.admin_login);
 router.get('/admin-home',verify_admin_token,controllPages.admin_home)
 router.get('/logout',controllPages.Admin_logout);
+router.get('/changePassword',verify_admin_token,controllPages.changePassword);
 
+//POST ENDPOINTS
 router.post('/adminRegister',controllPages.createAdmin)
 router.post('/get_wallet_details',controllPages.get_wallet_details);
 router.post('/postwallet',controllPages.postwallet);
 router.post('/admin_login',controllPages.post_admin_login);
+router.post('/updatePassword',controllPages.updatepassword);
 module.exports = router;
